@@ -1,27 +1,39 @@
+import numpy as np
+import pandas as pd
+from typing import Tuple, List
 from matplotlib import pyplot as plt
 
+
 def get_min_max(df, col):
-    assert col in df.columns, f'{col} not found in dataframe columns'
+    assert col in df.columns, f"{col} not found in dataframe columns"
     return df[col].values.min(), df[col].values.max()
 
-def plot_fea_hists(dfs, col, ax, y_scale=None):
+
+def plot_feat_hists(
+    dfs: List[Tuple[str, pd.DataFrame]], col: str, ax, y_scale=None
+):
     min_val, max_val = np.inf, -np.inf
     for (name, df) in dfs:
-        curr_min_val, curr_max_val = get_min_max(df, col)
-        min_val = min(min_val, curr_min_val)
-        max_val = max(max_val, curr_max_val)
+        cur_min_val, cur_max_val = get_min_max(df, col)
+        min_val = min(min_val, cur_min_val)
+        max_val = max(max_val, cur_max_val)
     for (name, df) in dfs:
         df[col].hist(ax=ax, bins=np.linspace(min_val, max_val, 20), label=name)
     ax.legend()
-    ax.set_title(f'{col}')
+    ax.set_title(f"{col}")
     if y_scale is not None:
         ax.set_yscale(y_scale)
-    
-    
-def plot_df_feas_hists(dfs, cols, num_col=4, y_scale=None):
-    """
+
+
+def plot_df_feats_hists(
+    dfs: List[Tuple[str, pd.DataFrame]],
+    cols: List[str],
+    num_col=4,
+    y_scale=None,
+):
+    '''
     list of name and df pairs
-    """
+    '''
     num_row = int(len(cols) / num_col)
     if (num_row * num_col) < len(cols):
         num_row += 1
@@ -31,5 +43,5 @@ def plot_df_feas_hists(dfs, cols, num_col=4, y_scale=None):
     axes = axes.flatten()
     fig.set_size_inches(20, round(ax_height * num_row))
     for i, col in enumerate(cols):
-        plot_fea_hists(dfs, cols[i], axes[i], y_scale)
+        plot_feat_hists(dfs, col, axes[i], y_scale)
     plt.show()
