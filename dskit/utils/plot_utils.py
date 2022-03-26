@@ -1,13 +1,17 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
+
 def get_min_max(df, col):
-    assert col in df.columns, f'{col} not found in dataframe columns'
+    assert col in df.columns, f"{col} not found in dataframe columns"
     return df[col].values.min(), df[col].values.max()
+
 
 def plot_fea_hists(dfs, names, col, ax):
     if names is not None:
-        assert len(dfs) == len(names), 'len of DataFrames not euqal to len of names'
+        assert len(dfs) == len(
+            names
+        ), "len of DataFrames not euqal to len of names"
     min_val, max_val = np.inf, -np.inf
     for df in dfs:
         curr_min_val, curr_max_val = get_min_max(df, col)
@@ -18,10 +22,10 @@ def plot_fea_hists(dfs, names, col, ax):
         df[col].hist(ax=ax, bins=np.linspace(min_val, max_val, 20), label=name)
     if names is not None:
         ax.legend()
-    ax.set_title(f'{col}')
-    ax.set_yscale('log')
+    ax.set_title(f"{col}")
+    ax.set_yscale("log")
     if max_val > 100:
-        ax.set_xscale('log')
+        ax.set_xscale("log")
 
 
 def plot_df_feas_hists(*dfs, names=None, cols=None, num_col=4):
