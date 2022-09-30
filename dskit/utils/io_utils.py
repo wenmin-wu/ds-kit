@@ -1,30 +1,36 @@
+import re
 import pickle
-from typing import Callable
+import time
+import ujson as json
 from smart_open import open as sopen
-from .logging_utils import get_logger
-
-logger = get_logger("IO")
+from typing import Tuple, Callable
 
 
-def get_open_fn(file_path: str) -> Callable:
-    if file_path.startswith("s3://"):
-        return sopen
-    else:
-        return open
+def get_path_and_open_fn(path: str) -> Tuple[str, Callable]:
+    path = re.sub("^s3.://", "s3://", path)
+    open_fn = sopen if path.startswith("s3://") else open
+    return path, open_fn
 
 
-def load_pkl(file_path: str) -> object:
-    open_fn = get_open_fn(file_path)
-    logger.info(f"Loading object from {file_path} ...")
-    with open_fn(file_path, "rb") as fin:
-        obj = pickle.load(fin)
-        logger.info(f"Loaded object from {file_path}.")
-        return obj
+def pickle_load(path: str) -> object:
+    path, open_fn = get_path_and_open_fn(path)
+    with open_fn(path, "rb") as f:
+        return pickle.load(f)
 
 
-def dump_pkl(obj: object, file_path: str) -> None:
-    open_fn = get_open_fn(file_path)
-    logger.info(f"Dumping object to {file_path} ...")
-    with open_fn(file_path, "wb") as fout:
-        pickle.dump(obj, fout)
-    logger.info(f"Dumped object to {file_path}.")
+def pickle_dump(obj: object, path: str):
+    path, open_fn = get_path_and_open_fn(path)
+    with open_fn(path, "wb") as f_out:
+        pickle.dump(obj, f_out)
+
+
+def json_load(path: str) -> dict:
+    path, open_fn = get_path_and_open_fn(path)
+    with open_fn(path, "r") as f:
+        return json.load(f)
+
+
+def json_dump(obj: object, path: str):
+    path, open_fn = get_path_and_open_fn(path)
+    with open_fn(path, "w") as f_out:
+        json.dump(obj, f_out)
